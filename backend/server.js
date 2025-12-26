@@ -17,6 +17,15 @@ app.use(cookieParser());
 import authRoutes from './routes/authRoutes.js';
 app.use('/api/auth', authRoutes);
 
+import authMiddleware from './middlewares/authMiddleware.js';
+app.use(authMiddleware);
+
+import projectRoutes from './routes/projectRoute.js';
+app.use('/api/projects', projectRoutes);
+
+import taskRoutes from './routes/taskRoute.js';
+app.use('/api/tasks', taskRoutes);
+
 const PORT = process.env.PORT || 3001;
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {

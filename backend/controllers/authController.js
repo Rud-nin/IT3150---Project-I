@@ -6,14 +6,13 @@ export const register = async (req, res) => {
     try {
         const { username, password } = req.body;
         if(!username || !password) return res.status(400).json({ sucess: false, message: 'Username and password are required.' });
-        if(password.length < 8) return res.status(400).json({ sucess: false, message: 'Password must contains at least 8 characters.' })
+        if(password.length < 8) return res.status(400).json({ sucess: false, message: 'Password must contains at least 8 characters.' });
     
         const user = await User.findOne({ username });
         if(user) return res.status(400).json({ sucess: false, message: 'Username already exists.' });
     
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, password: hashedPassword });
-        await newUser.save();
+        await User.create({ username, password: hashedPassword });
     
         res.status(201).json({ sucess: true, message: 'User created successfully.' });
     } catch (error) {
