@@ -2,6 +2,7 @@ import express from 'express';
 import {
     createProject,
     getProjects,
+    getProjectById,
     deleteProject,
     addParticipant,
     removeParticipant
@@ -9,8 +10,9 @@ import {
 
 const router = express.Router();
 
-router.get('/', getProjects);
 router.post('/', createProject);
+router.get('/', getProjects);
+router.get('/:projectId', getProjectById);
 router.delete('/:projectId', deleteProject);
 router.post('/:projectId/participants', addParticipant);
 router.delete('/:projectId/participants', removeParticipant);

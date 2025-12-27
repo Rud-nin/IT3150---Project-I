@@ -7,7 +7,14 @@
 
 :root {
     --max-content-width: 1080px;
-    --bg: #0a0f14;
+    --bg: hsl(0, 0%, 5%);
+    --bg-opposite: white;
+    --text: white;
+    --text-opposite: hsl(0, 0%, 5%);
+    --transition-duration: 0.25s;
+
+    --sidebar-width: 220px;
+    --border-width: 3px;
 }
 
 html, body {

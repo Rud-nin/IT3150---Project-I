@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useFetch } from '../libs/useFetch';
+import { removeToken, setToken } from '../libs/storage';
 
 export const useAuthStore = create((set) => ({
     isLoading: false,
@@ -7,7 +8,7 @@ export const useAuthStore = create((set) => ({
         set({ isLoading: true });
         try {
             if(!username || !password) throw new Error('Username and password are required');
-            return await useFetch('/register', {
+            return await useFetch('/auth/register', {
                 method: 'POST',
                 body: JSON.stringify({ username, password }),
             });
@@ -19,22 +20,19 @@ export const useAuthStore = create((set) => ({
         set({ isLoading: true });
         try {
             if(!username || !password) throw new Error('Username and password are required');
-            return await useFetch('/login', {
+            const res = await useFetch('/auth/login', {
                 method: 'POST',
                 body: JSON.stringify({ username, password }),
-            })
+            });
+            setToken(res.token);
+            return res;
         } finally {
             set({ isLoading: false });
         }
     },
     logout: async () => {
-        set({ isLoading: true });
-        try {
-            return await useFetch('/logout', {
-                method: 'POST',
-            });
-        } finally {
-            set({ isLoading: false });
-        }
+        set({ token: null });
+        removeToken();
+        await useFetch('/auth/logout', { method: 'POST' }).catch(() => {});
     },
 }));

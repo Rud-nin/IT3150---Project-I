@@ -1,3 +1,4 @@
+import { getToken } from "./storage";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3001';
 
@@ -6,15 +7,15 @@ export async function useFetch(url, options = {}, timeout = 5000) {
     const id = setTimeout(() => controller.abort(), timeout);
 
     try {
-        return await fetch(BASE_URL + url, {
+        return await fetch(BASE_URL + '/api' + url, {
             ...options,
             signal: controller.signal,
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                ...options.headers,
+                Authorization: `Bearer ${getToken() || ''}`,
             },
-        });
+        }).then(res => res.json());
     } catch(err) {
         console.error(err);
         throw err;

@@ -16,15 +16,18 @@ function Login() {
         e.preventDefault();
         try {
             if (action === 'login') {
-                await login(username, password);
+                const res = await login(username, password);
+                if(!res.success) throw new Error(res.message);
                 toast.success('Login successful');
                 navigate('/dashboard');
             } else {
-                await register(username, password);
+                const res = await register(username, password);
+                if(!res.success) throw new Error(res.message);
                 toast.success('Registration successful');
                 setAction('login');
             }
         } catch (error) {
+            console.log(error);
             toast.error(error.message);
         }
     }
@@ -32,36 +35,32 @@ function Login() {
     return (
         <main className={styles.login}>
             <div>
-                <h1>{action === 'login' ? 'Welcome Back!' : 'Create new Account!'}</h1>
-                <div className={styles.switch}>
-                    <button onClick={() => setAction('register')}>Register</button>
-                    <button onClick={() => setAction('login')}>Login</button>
+                <div>
+                    <h2>{action === 'login' ? 'Welcome Back!' : 'Create new Account!'}</h2>
+                    <span className={styles.switch}>
+                        <button onClick={() => setAction('register')}>Register</button>
+                        <button onClick={() => setAction('login')}>Login</button>
+                    </span>
                 </div>
                 <div className={styles.divider}></div>
-                <form onSubmit={handleSubmit}>
-                    <div className={`${styles.username} ${styles.field}`}>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div>
                     <input
-                        className={styles.username}
-                        placeholder=""
+                        placeholder="Enter Username"
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)} />
-                    <label>Username</label>
                     </div>
 
-                    <div className={`${styles.password} ${styles.field}`}>
+                    <div>
                     <input
-                        className={styles.password}
-                        placeholder=""
+                        placeholder="Enter password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)} />
-                    <label>Password</label>
                     </div>
 
-                    <button type="submit">
-                        {action === 'login' ? 'Login' : 'Register'}
-                    </button>
+                    <button type="submit">Continue</button>
                 </form>
             </div>
         </main>
