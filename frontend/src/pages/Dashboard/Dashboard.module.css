@@ -42,7 +42,7 @@
     overflow: visible;
 }
 
-.newProject {
+.confirm {
     position: relative;
     width: 100%;
     opacity: 0;
@@ -53,7 +53,7 @@
     to { opacity: 1; }
 }
 
-.newProject > div {
+.confirm > div {
     position: absolute;
     top: 0;
     left: 5%;
@@ -64,7 +64,7 @@
     gap: 0.5rem;
 }
 
-.newProject input {
+.confirm input {
     grid-column: span 2 / span 2;
     background-color: var(--bg-opposite);
     color: var(--text-opposite);
@@ -74,10 +74,15 @@
     font-size: 0.8rem;
 }
 
-.newProject button {
+.confirm button {
     width: 100% !important;
     text-align: center !important;
     overflow: visible !important;
+}
+
+.confirm h3 {
+    grid-column: span 2 / span 2;
+    text-align: center;
 }
 
 .projects {
@@ -87,7 +92,41 @@
     align-items: center;
     position: relative;
     top: 0;
+    gap: 0.5rem;
     transition: top var(--transition-duration);
+}
+
+.projects div {
+    width: 90%;
+    position: relative;
+}
+
+.projects button:not(.deleteButton) {
+    width: 100% !important;
+}
+
+.projects .deleteButton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: fit-content !important;
+    font-size: 0.8rem;
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
+    border: none;
+    background-color: transparent;
+    display: none;
+}
+
+.projects div:hover .deleteButton {
+    display: inline;
+}
+
+.deleteModal {
+    position: absolute !important;
+    top: 0;
+    left: calc(100% + 1rem);
+    z-index: 2;
 }
 
 .dashboard nav button {
@@ -147,6 +186,43 @@
     margin-left: 1ch;
 }
 
+.dropbox {
+    position: relative;
+    z-index: 2;
+}
+
+.dropbox > * {
+    position: absolute;
+    top: 3rem;
+    right: 0;
+    background-color: hsla(0, 0%, 15%, 0.5);
+    border: var(--border-width) solid var(--bg-opposite);
+    backdrop-filter: blur(10px);
+}
+
+.newTask {
+    display: grid;
+    width: 20vw;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto 3.5rem auto auto;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.newTask input, .newTask textarea, .newTask select {
+    grid-column: span 2 / span 2;
+    padding: 0.5rem 1ch;
+    outline: none;
+    background-color: var(--bg);
+    color: var(--text);
+    border: var(--border-width) solid var(--bg-opposite);
+    font-size: 1rem;
+}
+
+.newTask input::placeholder, .newTask textarea::placeholder {
+    color: var(--text);
+}
+
 .dashboard main {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -175,6 +251,78 @@
 .dashboard main > div > div:not(:first-child) {
     border: var(--border-width) solid var(--bg-opposite);
     position: relative;
+    color: var(--text);
     cursor: grab;
     background-color: var(--bg);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: hsla(0, 0%, 0%, 0.5);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review, .delete {
+    width: max(450px, 25vw);
+    padding: 1rem !important;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.review {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.delete {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.review, .review input, .review textarea, .review select, .review button {
+    background-color: var(--bg);
+    border: var(--border-width) solid var(--bg-opposite);
+    color: var(--text);
+    outline: none;
+    font-size: 1rem;
+    padding: 0.5rem 1ch;
+}
+
+.review input, .review textarea, .review select {
+    border-color: transparent;
+}
+
+.review textarea {
+    resize: none;
+}
+
+.review input:focus, .review textarea:focus, .review select:focus {
+    border-color: var(--bg-opposite);
+}
+
+.review > *:nth-child(-n + 4) {
+    grid-column: span 3 / span 3;
+}
+
+.review > div {
+    margin: 0 1.5ch;
+}
+
+.delete, .delete button {
+    background-color: var(--bg);
+    border: var(--border-width) solid var(--bg-opposite);
+    color: var(--text);
+    outline: none;
+    font-size: 1rem;
+    padding: 0.5rem 1ch;
+}
+
+.delete > *:first-child {
+    grid-column: span 2 / span 2;
+    text-align: center;
 }

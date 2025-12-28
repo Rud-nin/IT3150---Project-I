@@ -9,6 +9,19 @@ export const useProjectStore = create((set) => ({
         try {
             const res = await useFetch('/projects', { method: 'GET' });
             set({ projects: res.projects });
+            return res;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+    fetchProject: async (id) => {
+        set({ isLoading: true });
+        try {
+            const res = await useFetch(`/projects/${id}`, { method: 'GET' });
+            set((state) => ({ projects: state.projects.map(
+                project => project._id === id ? res.project : project
+            )}));
+            return res;
         } finally {
             set({ isLoading: false });
         }
@@ -28,9 +41,13 @@ export const useProjectStore = create((set) => ({
     deleteProject: async (id) => {
         set({ isLoading: true });
         try {
-            return await useFetch(`/projects/${id}`, {
+            const res = await useFetch(`/projects/${id}`, {
                 method: 'DELETE',
             });
+            set((state) => ({
+                projects: state.projects.filter(project => project._id !== id)
+            }));
+            return res;
         } finally {
             set({ isLoading: false });
         }

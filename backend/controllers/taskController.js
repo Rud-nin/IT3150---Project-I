@@ -36,7 +36,7 @@ export const updateTask = async (req, res) => {
         const { taskId } = req.params;
         const { name, description, assignedTo, status } = req.body;
 
-        const project = await Project.findById(taskId);
+        const project = await Project.findOne({ tasks: taskId });
         if(!project)
             return res.status(404).json({ success: false, message: 'Project not found.' });
         if(!project.participants.includes(req.userId))
@@ -69,7 +69,7 @@ export const deleteTask = async (req, res) => {
     try {
         const { taskId } = req.params;
 
-        const project = await Project.findById(taskId);
+        const project = await Project.findOne({ tasks: taskId });
         if(!project)
             return res.status(404).json({ success: false, message: 'Project not found.' });
         if(!project.participants.includes(req.userId))

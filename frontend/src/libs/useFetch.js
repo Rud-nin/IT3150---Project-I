@@ -7,7 +7,7 @@ export async function useFetch(url, options = {}, timeout = 5000) {
     const id = setTimeout(() => controller.abort(), timeout);
 
     try {
-        return await fetch(BASE_URL + '/api' + url, {
+        const respond = await fetch(BASE_URL + '/api' + url, {
             ...options,
             signal: controller.signal,
             credentials: 'include',
@@ -16,6 +16,10 @@ export async function useFetch(url, options = {}, timeout = 5000) {
                 Authorization: `Bearer ${getToken() || ''}`,
             },
         }).then(res => res.json());
+
+        if(!respond.success) throw new Error(res.message);
+
+        return respond;
     } catch(err) {
         console.error(err);
         throw err;

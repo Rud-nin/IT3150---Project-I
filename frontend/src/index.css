@@ -3,18 +3,23 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Nunito Sans', sans-serif;
+    transition-property: color, background-color, border-color;
+    transition-duration: var(--transition-duration);
 }
 
 :root {
     --max-content-width: 1080px;
-    --bg: hsl(0, 0%, 5%);
-    --bg-opposite: white;
-    --text: white;
-    --text-opposite: hsl(0, 0%, 5%);
-    --transition-duration: 0.25s;
-
     --sidebar-width: 220px;
     --border-width: 3px;
+    --transition-duration: 0.25s;
+
+    --dark: #010409;
+    --light: white;
+
+    --bg: var(--dark);
+    --bg-opposite: var(--light);
+    --text: var(--light);
+    --text-opposite: var(--dark);
 }
 
 html, body {

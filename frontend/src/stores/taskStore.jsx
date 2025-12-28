@@ -14,12 +14,12 @@ export const useTaskStore = create((set) => ({
             set({ isLoading: false });
         }
     },
-    updateTask: async (projectId, taskId, name, description, assignedTo) => {
+    updateTask: async (taskId, name, description, status, assignedTo) => {
         set({ isLoading: true });
         try {
             return await useFetch(`/tasks/${taskId}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ projectId, name, description, assignedTo }),
+                body: JSON.stringify({ name, description, status, assignedTo }),
             });
         } finally {
             set({ isLoading: false });
