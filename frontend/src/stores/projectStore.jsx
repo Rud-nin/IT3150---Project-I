@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { useFetch } from '../libs/useFetch';
 
-export const useProjectStore = create((set) => ({
+const notFoundMessage = 'Project not found.';
+
+export const useProjectStore = create((set, get) => ({
     isLoading: false,
     projects: [],
     fetchProjects: async () => {
@@ -22,6 +24,10 @@ export const useProjectStore = create((set) => ({
                 project => project._id === id ? res.project : project
             )}));
             return res;
+        } catch (error) {
+            if (error.message === notFoundMessage)
+                get().handleProjectNotFound(id);
+            throw error;
         } finally {
             set({ isLoading: false });
         }
@@ -44,15 +50,17 @@ export const useProjectStore = create((set) => ({
             const res = await useFetch(`/projects/${id}`, {
                 method: 'DELETE',
             });
-            set((state) => ({
-                projects: state.projects.filter(project => project._id !== id)
-            }));
+            get().handleProjectNotFound(id);
             return res;
+        } catch (error) {
+            if (error.message === notFoundMessage)
+                get().handleProjectNotFound(id);
+            throw error;
         } finally {
             set({ isLoading: false });
         }
     },
-    inviteToProject: async (projectById, userId) => {
+    addToProject: async (projectById, userId) => {
         set({ isLoading: true });
         try {
             if(!projectById || !userId)
@@ -61,6 +69,10 @@ export const useProjectStore = create((set) => ({
                 method: 'POST',
                 body: JSON.stringify({ userId }),
             })
+        } catch (error) {
+            if (error.message === notFoundMessage)
+                get().handleProjectNotFound(id);
+            throw error;
         } finally {
             set({ isLoading: false });
         }
@@ -74,8 +86,15 @@ export const useProjectStore = create((set) => ({
                 method: 'DELETE',
                 body: JSON.stringify({ userId }),
             })
+        } catch (error) {
+            if (error.message === notFoundMessage)
+                get().handleProjectNotFound(id);
+            throw error;
         } finally {
             set({ isLoading: false });
         }
     },
+    handleProjectNotFound: (id) => set((state) => ({
+        projects: state.projects.filter(project => project._id !== id)
+    }))
 }));

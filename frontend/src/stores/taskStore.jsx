@@ -1,7 +1,11 @@
 import { useFetch } from "../libs/useFetch";
 import { create } from "zustand";
+import { useProjectStore } from "./projectStore";
 
-export const useTaskStore = create((set) => ({
+const projectNotFoundMessage = 'Project not found.';
+const taskNotFoundMessage = 'Task not found.';
+
+export const useTaskStore = create((set, get) => ({
     isLoading: false,
     createTask: async (projectId, name, description, assignedTo) => {
         set({ isLoading: true });
@@ -14,13 +18,21 @@ export const useTaskStore = create((set) => ({
             set({ isLoading: false });
         }
     },
-    updateTask: async (taskId, name, description, status, assignedTo) => {
+    updateTask: async (projectId, taskId, name, description, status, assignedTo) => {
         set({ isLoading: true });
         try {
             return await useFetch(`/tasks/${taskId}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ name, description, status, assignedTo }),
             });
+        } catch (error) {
+            if (error.message === taskNotFoundMessage) {
+                useProjectStore.getState().fetchProject(projectId);
+            }
+            else if ([projectNotFoundMessage, taskNotFoundMessage].includes(error.mess)) {
+                useProjectStore.getState().handleProjectNotFound(projectId);
+            }
+            throw error;
         } finally {
             set({ isLoading: false });
         }
@@ -31,6 +43,14 @@ export const useTaskStore = create((set) => ({
             return await useFetch(`/tasks/${taskId}`, {
                 method: 'DELETE',
             });
+        } catch (error) {
+            if (error.message === taskNotFoundMessage) {
+                useProjectStore.getState().fetchProject(projectId);
+            }
+            else if (error.message === projectNotFoundMessage) {
+                useProjectStore.getState().handleProjectNotFound(projectId);
+            }
+            throw error;
         } finally {
             set({ isLoading: false });
         }

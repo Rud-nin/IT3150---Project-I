@@ -15,13 +15,17 @@ export async function useFetch(url, options = {}, timeout = 5000) {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${getToken() || ''}`,
             },
-        }).then(res => res.json());
+        });
 
-        if(!respond.success) throw new Error(res.message);
+        const res = await respond.json();
 
-        return respond;
+        if(!res.success)
+            throw new Error(res.message || 'Something went wrong');
+
+        return res;
     } catch(err) {
-        console.error(err);
+        if(import.meta.env.NODE_ENV === 'development')
+            console.error(err);
         throw err;
     } finally {
         clearTimeout(id);

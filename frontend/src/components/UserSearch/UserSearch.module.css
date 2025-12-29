@@ -1,0 +1,35 @@
+.userSearch {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: var(--light);
+}
+
+.userSearch input, .userSearch button {
+    padding: 0.5rem 1ch;
+    background-color: var(--bg);
+    color: var(--text);
+    outline: none;
+    border: var(--border-width) solid var(--bg-opposite);
+}
+
+.userSearch input::placeholder {
+    color: var(--text);
+}
+
+.userSearch > * {
+    width: 100%;
+}
+
+.userSearch > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.userSearch span {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

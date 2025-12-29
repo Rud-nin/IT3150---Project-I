@@ -49,3 +49,7 @@ export const logout = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error.' });
     }
 };
+
+export const check = (req, res) => {
+    res.status(200).json({ success: true, message: "Valid user." });
+}

@@ -1,0 +1,27 @@
+.loading {
+    color: var(--text);
+    font-size: 1rem;
+    opacity: 0;
+    transition: opacity 0.5s;
+    animation: loading 1s infinite;
+}
+
+.show {
+    opacity: 1;
+}
+
+.hide {
+    opacity: 0;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.2);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}

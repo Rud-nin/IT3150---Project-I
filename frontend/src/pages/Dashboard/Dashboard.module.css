@@ -159,6 +159,10 @@
     padding-bottom: 0;
 }
 
+.dashboard header > *:first-child {
+    margin-right: auto;
+}
+
 .dashboard header button {
     padding: 0.5rem;
     border: var(--border-width) solid var(--bg-opposite);
@@ -198,15 +202,15 @@
     background-color: hsla(0, 0%, 15%, 0.5);
     border: var(--border-width) solid var(--bg-opposite);
     backdrop-filter: blur(10px);
+    width: max(20vw, 250px);
+    padding: 1rem;
 }
 
 .newTask {
     display: grid;
-    width: 20vw;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: auto 3.5rem auto auto;
     gap: 0.5rem;
-    padding: 1rem;
 }
 
 .newTask input, .newTask textarea, .newTask select {
@@ -221,6 +225,13 @@
 
 .newTask input::placeholder, .newTask textarea::placeholder {
     color: var(--text);
+}
+
+.notifications {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: var(--light);
 }
 
 .dashboard main {

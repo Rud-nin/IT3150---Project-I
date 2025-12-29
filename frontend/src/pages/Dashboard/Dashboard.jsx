@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '../../stores/authStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { useTaskStore } from '../../stores/taskStore';
 import { toggleTheme, isDarkMode } from '../../libs/utils';
 import Draggable from '../../components/Draggable/Draggable';
+import Loading from '../../components/Loading/Loading';
+import Notifications from '../../components/Notifications/Notifications';
+import UserSearch from '../../components/UserSearch/UserSearch';
 import styles from './Dashboard.module.css';
 
 function Dashboard() {
@@ -16,18 +21,31 @@ function Dashboard() {
     const toDoTasks = currentProject?.tasks?.filter(task => task.status === 'To Do') ?? [];
     const inProgressTasks = currentProject?.tasks?.filter(task => task.status === 'In Progress') ?? [];
     const doneTasks = currentProject?.tasks?.filter(task => task.status === 'Done') ?? [];
-    
-    const [showNotification, setShowNotification] = useState(false);
-    const [_, __] = useState(false);
 
+    const [dropbox, setDropbox] = useState(""); // empty string | "new task" | "user" | "notification"
+    
     const { createTask, updateTask, deleteTask } = useTaskStore();
     const [newTask, setNewTask] = useState(null);
     const [currentTask, setCurrentTask] = useState(null);
     const [deletingTask, setDeletingTask] = useState(null);
+    
+    const { logout, isValidUser, isLoading } = useAuthStore();
+
+    const [_, __] = useState(false);
 
     const forceRerender = () => __(!_);
     const shiftDown = () => document.getElementById("projects").style.top = "6rem";
     const shiftUp = () => document.getElementById("projects").style.top = "0";
+
+    const handleChangeDropBox = (value) => {
+        if (dropbox === value || value === "") {
+            setNewTask(null);
+            return setDropbox("");
+        }
+        if (!["new task", "user", "notification"].includes(value)) return;
+        if (value === "new task") setNewTask({});
+        setDropbox(value);
+    }
 
     const handleFetchCurrentProject = async () => {
         if(!currentProject) return;
@@ -70,7 +88,7 @@ function Dashboard() {
             );
             await fetchProject(currentProject._id);
             toast.success("Task created successfully");
-            setNewTask(null);
+            handleChangeDropBox("");
         } catch (error) {
             toast.error(error.message);
         }
@@ -107,16 +125,33 @@ function Dashboard() {
         });
 
         const newStatus = distances.sort((a, b) => a.dist - b.dist)[0].status;
+        let errorOcurred = false;
 
-        await updateTask(task._id, task.name, task.description, newStatus, task.assignedTo);
-        await fetchProject(currentProject._id);
-        if(newStatus !== task.status) toast.success(`Task updated to ${newStatus}`);
+        await updateTask(
+            currentProject._id,
+            task._id,
+            task.name,
+            task.description,
+            newStatus,
+            task.assignedTo?._id
+        ).catch((error) => {
+            toast.error(error.message);
+            errorOcurred = true;
+        });
+        await fetchProject(currentProject._id)
+            .catch((error) => {
+                toast.error(error.message);
+                errorOcurred = true;
+            });
+        if(newStatus !== task.status && !errorOcurred)
+            toast.success(`Task updated to ${newStatus}`);
     };
 
     const handleUpdateTask = async () => {
         if(!currentTask) return;
         try {
             await updateTask(
+                currentProject._id,
                 currentTask._id,
                 currentTask.name,
                 currentTask.description,
@@ -144,6 +179,11 @@ function Dashboard() {
         }
     }
 
+    const handleLogout = () => {
+        logout();
+        toast.success("Logged out successfully");
+    }
+
     useEffect(() => {
         if(currentIndex > projects.length - 1) setCurrentIndex(0);
     }, [projects]);
@@ -152,6 +192,9 @@ function Dashboard() {
         fetchProjects()
             .catch(() => toast.error("Failed to fetch your projects"));
     }, [])
+
+    if(!isLoading && !isValidUser)
+        return <Navigate to="/login" replace={true} />
 
     return (
         <div className={styles.dashboard}>
@@ -227,9 +270,10 @@ function Dashboard() {
                     ))}
                 </div>
             </nav>
+
             <section>
                 <header>
-                    {/* LOADING STATUS */}
+                    <Loading />
                     <button
                         className={styles.style}
                         onClick={() => {toggleTheme(); forceRerender();}}
@@ -253,20 +297,23 @@ function Dashboard() {
                         <i className="fa-solid fa-arrows-rotate"></i>
                         <span>Refresh</span>
                     </button>
-                    <button className={styles.style} onClick={() => setNewTask({})}>
+                    <button className={styles.style} onClick={() => handleChangeDropBox("new task")}>
                         <i className="fa-brands fa-stack-overflow" />
                         <span>New Task</span>
                     </button>
-                    <button className={styles.style}>
+                    <button className={styles.style} onClick={() => handleChangeDropBox("user")}>
                         <i className="fa-solid fa-users" />
                         <span>Invite To Project</span>
                     </button>
-                    <button className={styles.style} onClick={() => setShowNotification(n => !n)}>
+                    <button className={styles.style} onClick={() => handleChangeDropBox("notification")}>
                         <i className="fa-solid fa-bell" />
+                    </button>
+                    <button className={styles.style} onClick={handleLogout}>
+                        <i className="fa-solid fa-arrow-right-from-bracket"></i>
                     </button>
 
                     <div className={styles.dropbox}>
-                        {newTask && (
+                        {dropbox === "new task" && (
                             <div className={styles.newTask}>
                                 <input
                                     type="text"
@@ -295,12 +342,16 @@ function Dashboard() {
                                 </button>
                                 <button
                                     className={styles.style}
-                                    onClick={() => currentProject ? setNewTask(null) : toast.error("You must select a project first")}
+                                    onClick={() => handleChangeDropBox("")}
                                 >
                                     Cancel
                                 </button>
                             </div>
                         )}
+
+                        {dropbox === "user" && <UserSearch currentProject={currentProject} />}
+
+                        {dropbox === "notification" && <Notifications />}
                     </div>
                 </header>
 

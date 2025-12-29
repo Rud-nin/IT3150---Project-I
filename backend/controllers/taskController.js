@@ -1,5 +1,6 @@
 import Task from "../models/taskModel.js";
 import Project from "../models/projectModel.js";
+import mongoose from "mongoose";
 
 export const createTask = async (req, res) => {
     try {
@@ -36,28 +37,45 @@ export const updateTask = async (req, res) => {
         const { taskId } = req.params;
         const { name, description, assignedTo, status } = req.body;
 
-        const project = await Project.findOne({ tasks: taskId });
+        if(status !== undefined && !['To Do', 'In Progress', 'Done'].includes(status))
+            return res.status(400).json({ success: false, message: 'Invalid status.' });
+        if(assignedTo !== undefined && !mongoose.Types.ObjectId.isValid(assignedTo))
+            return res.status(400).json({ success: false, message: 'Invalid assignedTo.' });
+
+        const [task, project] = await Promise.all([
+            Task.findById(taskId),
+            Project.findOne({ tasks: taskId }),
+        ]);
+
+        if(!task)
+            return res.status(404).json({ success: false, message: 'Task not found.' });
         if(!project)
             return res.status(404).json({ success: false, message: 'Project not found.' });
         if(!project.participants.includes(req.userId))
             return res.status(403).json({ success: false, message: 'You are not authorized to update this task.' });
 
-        const newTask = {};
-        if(name) newTask.name = name;
-        if(description) newTask.description = description;
-        if(assignedTo) newTask.assignedTo = assignedTo;
-        if(status) {
-            if(!['To Do', 'In Progress', 'Done'].includes(status))
-                return res.status(400).json({ success: false, message: 'Invalid status.' });
-            newTask.status = status;
+        let differ = false;
+
+        if(name !== undefined && name !== task.name) {
+            task.name  = name;
+            differ = true;
+        }
+        if(description !== undefined && description !== task.description) {
+            task.description = description;
+            differ = true;
+        }
+        if(assignedTo !== undefined && assignedTo !== task.assignedTo?.toString()) {
+            task.assignedTo = new mongoose.Types.ObjectId(assignedTo);
+            differ = true;
+        }
+        if(status !== undefined && status !== task.status) {
+            task.status = status;
+            differ = true;
         }
 
-        if(Object.keys(newTask).length === 0)
-            return res.status(400).json({ success: false, message: 'No fields to update.' });
+        if(!differ) return res.status(400).json({ success: false, message: 'No new value to update.' });
 
-        const task = await Task.findByIdAndUpdate(taskId, newTask, { new: true });
-        if(!task) return res.status(404).json({ success: false, message: 'Task not found.' });
-
+        await task.save();
         res.status(200).json({ success: true, message: 'Task updated successfully.', task });
     } catch (error) {
         console.error(error);
@@ -69,17 +87,23 @@ export const deleteTask = async (req, res) => {
     try {
         const { taskId } = req.params;
 
-        const project = await Project.findOne({ tasks: taskId });
+        const [task, project] = await Promise.all([
+            Task.findById(taskId),
+            Project.findOne({ tasks: taskId }),
+        ]);
+
+        if(!task)
+            return res.status(404).json({ success: false, message: 'Task not found.' });
         if(!project)
             return res.status(404).json({ success: false, message: 'Project not found.' });
         if(!project.participants.includes(req.userId))
             return res.status(403).json({ success: false, message: 'You are not authorized to delete this task.' });
 
-        const task = await Task.findByIdAndDelete(taskId);
-        if(!task) return res.status(404).json({ success: false, message: 'Task not found.' });
-
         project.tasks = project.tasks.filter(task => task.toString() !== taskId);
-        await project.save();
+        await Promise.all([
+            project.save(),
+            task.deleteOne()
+        ]);
 
         res.status(200).json({ success: true, message: 'Task deleted successfully.' });
     } catch (error) {
