@@ -1,6 +1,8 @@
 import { getToken } from "./storage";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3001';
+const BASE_URL = NODE_ENV === 'development' ?
+    `http://${window.location.hostname}:3001` :
+    import.meta.env.VITE_BASE_URL;
 
 export async function useFetch(url, options = {}, timeout = 5000) {
     const controller = new AbortController();

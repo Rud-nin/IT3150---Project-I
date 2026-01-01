@@ -5,7 +5,7 @@ import { useProjectStore } from "./projectStore";
 const projectNotFoundMessage = 'Project not found.';
 const taskNotFoundMessage = 'Task not found.';
 
-export const useTaskStore = create((set, get) => ({
+export const useTaskStore = create((set) => ({
     isLoading: false,
     createTask: async (projectId, name, description, assignedTo) => {
         set({ isLoading: true });
@@ -14,6 +14,10 @@ export const useTaskStore = create((set, get) => ({
                 method: 'POST',
                 body: JSON.stringify({ projectId, name, description, assignedTo }),
             });
+        } catch (error) {
+            if (error.message === projectNotFoundMessage)
+                useProjectStore.getState().handleProjectNotFound(projectId);
+            throw error;
         } finally {
             set({ isLoading: false });
         }

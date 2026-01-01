@@ -13,7 +13,7 @@ dotenv.config({ quiet: true });
 const app = express();
 
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: process.env.NODE_ENV === 'development' ? true : process.env.CLIENT_URL,
     credentials: true,
 }));
 app.use(express.json());
@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 3001;
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('Connected to MongoDB');
-        app.listen(PORT, () => {
+        app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server running on port at: http://localhost:${PORT}`);
         });
     })
