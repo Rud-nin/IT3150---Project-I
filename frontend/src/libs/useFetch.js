@@ -1,6 +1,6 @@
 import { getToken } from "./storage";
 
-const BASE_URL = NODE_ENV === 'development' ?
+const BASE_URL = import.meta.env.NODE_ENV === 'development' ?
     `http://${window.location.hostname}:3001` :
     import.meta.env.VITE_BASE_URL;
 
@@ -12,7 +12,6 @@ export async function useFetch(url, options = {}, timeout = 5000) {
         const respond = await fetch(BASE_URL + '/api' + url, {
             ...options,
             signal: controller.signal,
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${getToken() || ''}`,
